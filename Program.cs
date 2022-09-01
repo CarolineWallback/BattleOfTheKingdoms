@@ -60,7 +60,7 @@ namespace LexiconBattle
 
             Random random = new Random();
 
-            Console.WriteLine("Welcome to the Battle of All Kingdoms!");
+            Console.WriteLine("Welcome to Battle of The Kingdoms!");
             Console.WriteLine("Start the game by giving your player a name.");
 
             Character player = new Character();
@@ -79,11 +79,15 @@ namespace LexiconBattle
             Console.WriteLine("You will play until your character dies or if you choose to retrieve efter a battle.");
             Console.WriteLine("You must battle at least 3 times before you can choose to retrieve.");
             Console.WriteLine("In the end you will be scored 2 points for every battle you won, ");
-            Console.WriteLine("but you will lose 2 points for every loss. You get 3 extra points if you are still alive when the game ends.");
+            Console.WriteLine("but you will lose 1 point for every loss. You get 3 extra points if you are still alive when the game ends.");
             Console.WriteLine("After each battle, if you win, your gear will be upgraded, and you can choose to use it next battle.");
-            Console.WriteLine("If you choose to use your gear it will be downgraded to a lower level, otherwise it will be saved for next battle.\n");
+            Console.WriteLine("If you choose to use your gear it will be downgraded to a lower level, otherwise it will be saved for next battle.");
+            Console.WriteLine("But be on the lookout... there might be some unexpected events. \n");
 
             DifficultyLevel();
+
+            if(difficulty.level == "easy")
+                player.gear = 1;
 
             Thread.Sleep(500);
             player.strength = random.Next(3, 11);
@@ -108,11 +112,11 @@ namespace LexiconBattle
                     break;
 
                     case "M" : difficulty.level = "medium";
-                    player.health = random.Next(25, 31);
+                    player.health = random.Next(26, 32);
                     break;
 
                     case "H" : difficulty.level = "hard";
-                    player.health = random.Next(20, 26);
+                    player.health = random.Next(22, 26);
                     break;
 
                     default : DifficultyLevel();
@@ -275,18 +279,18 @@ namespace LexiconBattle
             void RandomHappenings(Battle battle)
             {
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
-                int number = random.Next(1,11);
+                int number = random.Next(1,16);
 
                 switch (number)
                 {
                     case 1 : 
-                    Console.WriteLine("Oh no, you tripped on a big ugly rock and lost one of your dice-points.");
+                    Console.WriteLine("Oh no, you tripped on a big ugly rock and lost 1 dice-point.");
                     battle.round.playerRoll--;
                     Console.WriteLine($"Your new dice roll is {battle.round.playerRoll}.");
                     Thread.Sleep(2000);
                     break;
 
-                    case 3 : 
+                    case 2 : 
                     Console.WriteLine("AAAHHH! This is an ambush!! Your opponent has company and you are being attacked from all directions. You lose all your dice-points.");
                     battle.round.playerRoll = 0;
                     Console.WriteLine($"Your new dice roll is {battle.round.playerRoll}.");
@@ -296,14 +300,21 @@ namespace LexiconBattle
                     case 5 : 
                     Console.WriteLine ("Your opponent got stuck in that trap you set up a few days ago. He loses 2 dice-points.");
                     battle.round.opponentRoll -= 2;
-                    Console.WriteLine($"Your opponent {battle.battleOpponent.name} new dice roll is {battle.round.opponentRoll}.");
+                    if(battle.round.opponentRoll < 0)
+                        battle.round.opponentRoll = 0;
+                    Console.WriteLine($"Your opponent {battle.battleOpponent.name}'s new dice roll is {battle.round.opponentRoll}.");
                     Thread.Sleep(2000);
                     break;
 
-                    case 9 : 
+                    case 11 : 
                     Console.WriteLine("The sky is opening up and heavy rain falls. Neither of you can see anything, so you call it a tie.");
                     battle.round.playerRoll = battle.round.opponentRoll;
                     Thread.Sleep(2000);
+                    break;
+
+                    case 14 : 
+                    Console.WriteLine("Wait.. there's something shiny here on the ground. Some gold coins. You get 2 extra dice points.");
+                    battle.round.playerRoll += 2;  
                     break;
 
                     default: break;
@@ -335,7 +346,7 @@ namespace LexiconBattle
                 battle.winningCharacter = opponent;
                 player.losses++;
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"\nOh no, your opponent won, and you were damaged. You lost {opponent.strength} health-points.");
+                Console.WriteLine($"\nOh no, your opponent won, and you got injured. You lost {opponent.strength} health-points.");
                 Console.ForegroundColor = ConsoleColor.White;
                 player.health -= opponent.strength;
                 Thread.Sleep(2000);
@@ -398,7 +409,7 @@ namespace LexiconBattle
                 int score = 0;
                 
                 score += player.wins*2;
-                score -= player.losses*2;
+                score -= player.losses;
 
                 if (player.health > 0)
                     score += 3;
@@ -448,7 +459,10 @@ namespace LexiconBattle
                             Console.WriteLine("Press any key to exit.");
                             Console.ReadKey();
                             Environment.Exit(0);;
-                            break;     
+                            break;    
+
+                        default : ViewHighscore(score, saveScore);
+                        break; 
                     }   
                 }
             }
